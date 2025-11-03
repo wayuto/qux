@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <script src="/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/navbar.js"></script>
+    <script src="/js/files.js"></script>
+    <title>Qux</title>
+</head>
+<body class="bg-dark" data-bs-theme="dark">
+    <nav-bar></nav-bar>
+    <div class="container mt-5 pt-5">
+        <h4>Uploaded files</h4>
+        <ul id="fileList" class="list-group"></ul>
+    </div>
+    <script>
+        (async () => {
+            const list = document.getElementById('fileList');
+            const files = await fetch('http://localhost:1145/api/files').then(r => r.json());
+            if (!files.length) list.innerHTML = '<li class="list-group-item">No files yet</li>';
+            files.forEach(name => {
+                const li = document.createElement('li');
+                li.className = 'list-group-item d-flex justify-content-between align-items-center';
+                li.innerHTML = `<a href="/uploads/${name}" target="_blank" class="text-truncate" download >${name}</a>
+                                        <button class="btn btn-sm btn-outline-danger flex-shrink-0" onclick="delFile('${name}')">delete</button>`
+                list.appendChild(li);
+            });
+        })()
+    </script>
+</body>
+</html>
