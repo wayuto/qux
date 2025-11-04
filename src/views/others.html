@@ -28,17 +28,44 @@
         (async () => {
             const params = new URLSearchParams(location.search);
             const ip = params.get("ip");
-            if (!ip) alert("Invaild IP Address")
+            try {
+                const ctrl = new AbortController();
+                setTimeout(() => ctrl.abort(), 3000);
+                await fetch(`http://${ip}:1145/api/files`, { method: 'HEAD', signal: ctrl.signal })
+            } catch {
+                const modal = document.createElement('div');
+                modal.className = 'modal fade';
+                modal.tabIndex = -1;
+                modal.innerHTML = `
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Error</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">Invalid IP Address</div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+                    </div>
+                    </div>
+                </div>`;
+                document.body.appendChild(modal);
+                const bsModal = new bootstrap.Modal(modal);
+                modal.addEventListener('hidden.bs.modal', () => modal.remove());
+                bsModal.show();
+                return;
+            }
+
             const list = document.getElementById('fileList');
             const files = await fetch(`http://${ip}:1145/api/files`).then(r => r.json());
             if (!files.length) list.innerHTML = '<li class="list-group-item">No files yet</li>';
             files.forEach(name => {
                 const li = document.createElement('li');
                 li.className = 'list-group-item d-flex justify-content-between align-items-center';
-                li.innerHTML = `<a href="/uploads/${name}" target="_blank" class="text-truncate" download >${name}</a>`
+                li.innerHTML = `<a href="/uploads/${name}" target="_blank" class="text-truncate" download>${name}</a>`;
                 list.appendChild(li);
             });
-        })()
+        })();
     </script>
 </body>
 
