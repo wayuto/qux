@@ -1,7 +1,15 @@
+import { createHash } from "node:crypto";
 import { Application, Router, send } from "oak";
 
 const app = new Application();
 const router = new Router();
+
+
+const sha256 = async (file: string) => {
+    const c = await Deno.readTextFile(file);
+    const hash = createHash("sha256").update(c).digest("hex");
+    return hash;
+}
 
 router.get("/", async (ctx) => {
     let locals: string[] = [];
@@ -19,12 +27,12 @@ router.get("/", async (ctx) => {
     ctx.response.body = await Deno.readFile(response);
 })
 router.get("/others", async (ctx) => {
-    if (await ctx.cookies.get("authed") == "yes") {
-        ctx.response.body = await Deno.readTextFile("src/views/others.html");
-        return;
-    }
     try {
         await Deno.stat("passwd");
+        if (await ctx.cookies.get("authed") == await sha256("passwd")) {
+            ctx.response.body = await Deno.readTextFile("src/views/others.html");
+            return;
+        }
         ctx.response.body = await Deno.readTextFile("src/views/verify.html")
     } catch (e) {
         if (e instanceof Deno.errors.NotFound){
@@ -91,24 +99,13 @@ router.post("/api/setPass", async (ctx) => {
     }
 })
 
-const sha256 = async (text: string) => {
-    const buf = await crypto.subtle.digest(
-        "SHA-256",
-        new TextEncoder().encode(text)
-    );
-    return [...new Uint8Array(buf)]
-        .map(b => b.toString(16).padStart(2, "0"))
-        .join("");
-}
-
 router.post("/api/verify", async (ctx) => {
     const password = await Deno.readTextFile("passwd");
     const data = await ctx.request.body.formData();
     const input = data.get("password");
     const ip = data.get("ip");
     if (password == input) {
-        await ctx.cookies.set("authed", "yes");
-        await ctx.cookies.set("pwd", await sha256(password));
+        await ctx.cookies.set("authed", await sha256("passwd"));
         ctx.response.redirect(`/others?ip=${ip}`);
     } else {
         ctx.response.redirect(`/others?ip=${ip}`);
