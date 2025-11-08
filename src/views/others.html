@@ -1,41 +1,43 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
+  <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/css/bootstrap.min.css">
     <script src="/js/bootstrap.bundle.min.js"></script>
     <script src="/js/files.js"></script>
     <title>Others | Qux</title>
-</head>
+  </head>
 
-<body class="bg-dark" data-bs-theme="dark">
+  <body class="bg-dark" data-bs-theme="dark">
     <nav class="navbar navbar-expand bg-primary fixed-top" data-bs-theme="dark">
-        <div class="container">
-            <a class="navbar-brand" href="/">Qux</a>
-            <ul class="navbar-nav">
-                <li class="nav-item"><a href="/">Home</a></li>
-            </ul>
-        </div>
+      <div class="container">
+        <a class="navbar-brand" href="/">Qux</a>
+        <ul class="navbar-nav">
+          <li class="nav-item"><a href="/">Home</a></li>
+        </ul>
+      </div>
     </nav>
     <div class="container mt-5 pt-5">
-        <h4>Uploaded files</h4>
-        <ul id="fileList" class="list-group"></ul>
+      <h4>Uploaded files</h4>
+      <ul id="fileList" class="list-group"></ul>
     </div>
     <script>
-        (async () => {
-            const params = new URLSearchParams(location.search);
-            const ip = params.get("ip");
-            try {
-                const ctrl = new AbortController();
-                setTimeout(() => ctrl.abort(), 3000);
-                await fetch(`http://${ip}:1145/api/files`, { method: 'HEAD', signal: ctrl.signal })
-            } catch {
-                const modal = document.createElement('div');
-                modal.className = 'modal fade';
-                modal.tabIndex = -1;
-                modal.innerHTML = `
+      (async () => {
+        const params = new URLSearchParams(location.search);
+        const ip = params.get("ip");
+        try {
+          const ctrl = new AbortController();
+          setTimeout(() => ctrl.abort(), 3000);
+          await fetch(`http://${ip}:1145/api/files`, {
+            method: "HEAD",
+            signal: ctrl.signal,
+          });
+        } catch {
+          const modal = document.createElement("div");
+          modal.className = "modal fade";
+          modal.tabIndex = -1;
+          modal.innerHTML = `
                 <div class="modal-dialog modal-dialog-centered">
                     <div class="modal-content">
                     <div class="modal-header">
@@ -48,24 +50,33 @@
                     </div>
                     </div>
                 </div>`;
-                document.body.appendChild(modal);
-                const bsModal = new bootstrap.Modal(modal);
-                modal.addEventListener('hidden.bs.modal', () => modal.remove());
-                bsModal.show();
-                return;
-            }
+          document.body.appendChild(modal);
+          const bsModal = new bootstrap.Modal(modal);
+          modal.addEventListener(
+            "hidden.bs.modal",
+            () => modal.remove(),
+          );
+          bsModal.show();
+          return;
+        }
 
-            const list = document.getElementById('fileList');
-            const files = await fetch(`http://${ip}:1145/api/files`).then(r => r.json());
-            if (!files.length) list.innerHTML = '<li class="list-group-item">No files yet</li>';
-            files.forEach(name => {
-                const li = document.createElement('li');
-                li.className = 'list-group-item d-flex justify-content-between align-items-center';
-                li.innerHTML = `<a href="/uploads/${name}" target="_blank" class="text-truncate" download>${name}</a>`;
-                list.appendChild(li);
-            });
-        })();
+        const list = document.getElementById("fileList");
+        const files = await fetch(`http://${ip}:1145/api/files`).then(
+          (r) => r.json(),
+        );
+        if (!files.length) {
+          list.innerHTML =
+            '<li class="list-group-item">No files yet</li>';
+        }
+        files.forEach((name) => {
+          const li = document.createElement("li");
+          li.className =
+            "list-group-item d-flex justify-content-between align-items-center";
+          li.innerHTML =
+            `<a href="/uploads/${name}" target="_blank" class="text-truncate" download>${name}</a>`;
+          list.appendChild(li);
+        });
+      })();
     </script>
-</body>
-
+  </body>
 </html>

@@ -1,30 +1,74 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
+  <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/css/bootstrap.min.css">
     <script src="/js/bootstrap.bundle.min.js"></script>
     <title>Discovery | Qux</title>
-</head>
+  </head>
 
-<body class="bg-dark" data-bs-theme="dark">
+  <body class="bg-dark" data-bs-theme="dark">
     <nav class="navbar navbar-expand bg-primary fixed-top" data-bs-theme="dark">
-        <div class="container">
-            <a class="navbar-brand" href="/">Discovery | Qux</a>
-            <ul class="navbar-nav">
-                <li class="nav-item">
-                    <li class="nav-item"><a href="/">Home</a></li>
-                </li>
-            </ul>
-        </div>
+      <div class="container">
+        <a class="navbar-brand" href="/">Discovery | Qux</a>
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <li class="nav-item"><a href="/">Home</a></li>
+          </li>
+        </ul>
+      </div>
     </nav>
-    <script>
-        const params = new URLSearchParams(location.search);
-        document.querySelector('input[name="ip"]').value = params.get('ip') ?? '';
-        document.querySelector('input[name="redirectTo"]').value = params.get('redirectTo') ?? '';
-    </script>
-</body>
 
+    <div class="container mt-5 pt-5">
+      <h4 class="text-white-50 mb-3">Discovered Services</h4>
+
+      <ul id="service-list" class="list-group">
+        <li class="list-group-item bg-secondary text-white">Discovering…</li>
+      </ul>
+    </div>
+
+    <script>
+      const serviceList = document.getElementById("service-list");
+
+      const discover = async () => {
+        try {
+          const res = await fetch("/api/browse");
+          if (!res.ok) throw new Error("HTTP " + res.status);
+          const services = await res.json();
+
+          serviceList.innerHTML = "";
+          if (!services.length) {
+            serviceList.innerHTML =
+              '<li class="list-group-item">No services found</li>';
+            return;
+          }
+
+          services.forEach((s) => {
+            const li = document.createElement("li");
+            li.className =
+              "list-group-item d-flex justify-content-between align-items-center";
+            li.innerHTML = `
+            <div>
+              <div class="fw-bold">${s.name}</div>
+              <small class="text-muted">${s.host}</small>
+            </div>
+            <div>
+            <a href="http://${s.host}:1145">Manage</a>
+            <a href="/others?ip=${s.host}">View</a>
+            </div>
+          `;
+            serviceList.appendChild(li);
+          });
+        } catch (e) {
+          console.error(e);
+          serviceList.innerHTML =
+            '<li class="list-group-item text-danger">Network error</li>';
+        }
+      };
+
+      discover();
+      setInterval(discover, 5000);
+    </script>
+  </body>
 </html>
