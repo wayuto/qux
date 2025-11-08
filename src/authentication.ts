@@ -33,7 +33,7 @@ export const setAuthCookie = async (
 ): Promise<void> => {
   try {
     const passwordHash = await getPasswordHash(ip);
-    await ctx.cookies.set("authed", passwordHash, {
+    await ctx.cookies.set(`authed_${ip}`, passwordHash, {
       httpOnly: true,
       secure: false,
       maxAge: 24 * 60 * 60,
@@ -49,7 +49,7 @@ export const isAuthenticated = async (
 ): Promise<boolean> => {
   try {
     const passwordHash = await getPasswordHash(ip);
-    const cookieToken = await ctx.cookies.get("authed");
+    const cookieToken = await ctx.cookies.get(`authed_${ip}`);
     return cookieToken === passwordHash;
   } catch (error) {
     console.error("Authentication error:", error);
