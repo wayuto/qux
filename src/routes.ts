@@ -133,7 +133,8 @@ import { sha256 } from "./utils.ts";
 
 router.get("/api/passwd", async (ctx) => {
   try {
-    const hash = await sha256("passwd");
+    const passwd = await Deno.readTextFile("passwd");
+    const hash = await sha256(passwd);
     ctx.response.body = hash;
   } catch {
     ctx.response.status = 404;
@@ -144,7 +145,8 @@ router.get("/api/passwd", async (ctx) => {
 router.post("/api/verify", async (ctx) => {
   const data = await ctx.request.body.formData();
   const input = data.get("password") as string;
-  const ip = data.get("ip") as string ?? ctx.request.url.hostname;
+  let ip = data.get("ip") as string;
+  if (ip.trim() == "") ip = ctx.request.url.hostname;
   const redirectTo = data.get("redirectTo");
 
   const isValid = await verifyPassword(input, ip);

@@ -1,7 +1,6 @@
-export const sha256 = async (file: string): Promise<string> => {
-  const fileContent = await Deno.readTextFile(file);
+export const sha256 = async (s: string): Promise<string> => {
   const encoder = new TextEncoder();
-  const data = encoder.encode(fileContent);
+  const data = encoder.encode(s);
 
   const hashBuffer = await crypto.subtle.digest("SHA-256", data);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
