@@ -20,7 +20,7 @@ router.get("/", async (ctx) => {
   }
   locals = ["127.0.0.1", "::1", ...locals.map((addr) => addr.split("/")[0])];
 
-  const ip = ctx.request.ip.replace(/^::ffff:/, "");
+  const ip = ctx.request.url.hostname.replace(/^::ffff:/, "");
 
   if (locals.includes(ip) || await isAuthenticated(ctx, ip)) {
     ctx.response.body = await Deno.readTextFile("src/views/index.html");
