@@ -43,9 +43,9 @@
     </div>
     <script>
       const params = new URLSearchParams(location.search);
-      let ip = params.get("ip");
-      if (ip.trim() == "") ip = location.hostname;
-      document.querySelector('input[name="ip"]').value = ip;
+      document.querySelector('input[name="ip"]').value = params.get(
+        "ip",
+      );
       document.querySelector('input[name="redirectTo"]').value =
         params.get("redirectTo") ?? "";
     </script>
